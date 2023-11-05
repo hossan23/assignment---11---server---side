@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -20,6 +20,31 @@ const client = new MongoClient(uri, {
   strict: true,
   deprecationErrors: true,
  },
+});
+
+// database collections
+
+const jobsCollection = client.db('jobsCollection').collection('jobs');
+
+// job-post
+
+app.post('/jobs', async (req, res) => {
+ const data = req.body;
+ //  console.log(data);
+ const result = await jobsCollection.insertOne(data);
+ res.send(result);
+});
+
+app.get('/jobs', async (req, res) => {
+ const result = await jobsCollection.find().toArray();
+ res.send(result);
+});
+
+app.get('/jobs/:id', async (req, res) => {
+ const id = req.params.id;
+ const query = { _id: new ObjectId(id) };
+ const result = await jobsCollection.findOne(query);
+ res.send(result);
 });
 
 async function run() {
