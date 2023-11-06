@@ -25,8 +25,9 @@ const client = new MongoClient(uri, {
 // database collections
 
 const jobsCollection = client.db('jobsCollection').collection('jobs');
+const bidsCollection = client.db('bidsCollection').collection('bids');
 
-// job-post
+// job-post-api
 
 app.post('/jobs', async (req, res) => {
  const data = req.body;
@@ -44,6 +45,19 @@ app.get('/jobs/:id', async (req, res) => {
  const id = req.params.id;
  const query = { _id: new ObjectId(id) };
  const result = await jobsCollection.findOne(query);
+ res.send(result);
+});
+
+// bidding api
+
+app.post('/bids', async (req, res) => {
+ const data = req.body;
+ const result = await bidsCollection.insertOne(data);
+ res.send(result);
+});
+
+app.get('/bids', async (req, res) => {
+ const result = await bidsCollection.find().toArray();
  res.send(result);
 });
 
