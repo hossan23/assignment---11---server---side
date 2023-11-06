@@ -30,10 +30,14 @@ const bidsCollection = client.db('bidsCollection').collection('bids');
 // job-post-api
 
 app.post('/jobs', async (req, res) => {
- const data = req.body;
- //  console.log(data);
- const result = await jobsCollection.insertOne(data);
- res.send(result);
+ try {
+  const data = req.body;
+
+  const result = await jobsCollection.insertOne(data);
+  res.send(result);
+ } catch (error) {
+  console.log(error);
+ }
 });
 
 // app.get('/jobs', async (req, res) => {
@@ -42,26 +46,49 @@ app.post('/jobs', async (req, res) => {
 // });
 
 app.get('/jobs/:id', async (req, res) => {
- const id = req.params.id;
- const query = { _id: new ObjectId(id) };
- const result = await jobsCollection.findOne(query);
- res.send(result);
+ try {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await jobsCollection.findOne(query);
+  res.send(result);
+ } catch (err) {
+  console.log(err);
+ }
 });
 app.get('/jobs', async (req, res) => {
- let query = {};
- if (req.query?.email) {
-  query = { email: req.query.email };
+ try {
+  let query = {};
+  if (req.query?.email) {
+   query = { email: req.query.email };
+  }
+  const result = await jobsCollection.find(query).toArray();
+  res.send(result);
+ } catch (err) {
+  console.log(err);
  }
- const result = await jobsCollection.find(query).toArray();
- res.send(result);
+});
+
+app.delete('/jobs/:id', async (req, res) => {
+ try {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await jobsCollection.deleteOne(query);
+  res.send(result);
+ } catch (err) {
+  console.log(err);
+ }
 });
 
 // bidding api
 
 app.post('/bids', async (req, res) => {
- const data = req.body;
- const result = await bidsCollection.insertOne(data);
- res.send(result);
+ try {
+  const data = req.body;
+  const result = await bidsCollection.insertOne(data);
+  res.send(result);
+ } catch (err) {
+  console.log(err);
+ }
 });
 
 // app.get('/bids', async (req, res) => {
@@ -70,12 +97,16 @@ app.post('/bids', async (req, res) => {
 // });
 
 app.get('/bids', async (req, res) => {
- let query = {};
- if (req.query?.email) {
-  query = { email: req.query.email };
+ try {
+  let query = {};
+  if (req.query?.email) {
+   query = { email: req.query.email };
+  }
+  const result = await bidsCollection.find(query).toArray();
+  res.send(result);
+ } catch (err) {
+  console.log(err);
  }
- const result = await bidsCollection.find(query).toArray();
- res.send(result);
 });
 
 async function run() {
