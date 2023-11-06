@@ -36,15 +36,23 @@ app.post('/jobs', async (req, res) => {
  res.send(result);
 });
 
-app.get('/jobs', async (req, res) => {
- const result = await jobsCollection.find().toArray();
- res.send(result);
-});
+// app.get('/jobs', async (req, res) => {
+//  const result = await jobsCollection.find().toArray();
+//  res.send(result);
+// });
 
 app.get('/jobs/:id', async (req, res) => {
  const id = req.params.id;
  const query = { _id: new ObjectId(id) };
  const result = await jobsCollection.findOne(query);
+ res.send(result);
+});
+app.get('/jobs', async (req, res) => {
+ let query = {};
+ if (req.query?.email) {
+  query = { email: req.query.email };
+ }
+ const result = await jobsCollection.find(query).toArray();
  res.send(result);
 });
 
@@ -56,8 +64,17 @@ app.post('/bids', async (req, res) => {
  res.send(result);
 });
 
+// app.get('/bids', async (req, res) => {
+//  const result = await bidsCollection.find().toArray();
+//  res.send(result);
+// });
+
 app.get('/bids', async (req, res) => {
- const result = await bidsCollection.find().toArray();
+ let query = {};
+ if (req.query?.email) {
+  query = { email: req.query.email };
+ }
+ const result = await bidsCollection.find(query).toArray();
  res.send(result);
 });
 
