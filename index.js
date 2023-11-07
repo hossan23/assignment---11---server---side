@@ -79,7 +79,7 @@ app.delete('/jobs/:id', async (req, res) => {
  }
 });
 
-app.put('/jobs/:id', async (req, res) => {
+app.patch('/jobs/:id', async (req, res) => {
  try {
   const id = req.params.id;
   const UpdatedBody = req.body;
@@ -87,7 +87,7 @@ app.put('/jobs/:id', async (req, res) => {
   const options = { upsert: true };
   const updateDoc = {
    $set: {
-    email: UpdatedBody.email,
+    // email: UpdatedBody.email,
     job_title: UpdatedBody.job_title,
     deadline: UpdatedBody.deadline,
     description: UpdatedBody.description,
@@ -127,6 +127,25 @@ app.get('/bids', async (req, res) => {
    query = { email: req.query.email };
   }
   const result = await bidsCollection.find(query).toArray();
+  res.send(result);
+ } catch (err) {
+  console.log(err);
+ }
+});
+
+app.patch('/bids/:id', async (req, res) => {
+ try {
+  const id = req.params.id;
+  const UpdatedBody = req.body;
+  console.log(UpdatedBody, id);
+  const query = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+  const updateDoc = {
+   $set: {
+    status: UpdatedBody.status,
+   },
+  };
+  const result = await bidsCollection.updateOne(query, updateDoc, options);
   res.send(result);
  } catch (err) {
   console.log(err);
