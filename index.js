@@ -2,18 +2,42 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(express.json());
 app.use(
  cors({
   origin: ['http://localhost:5173'],
   credentials: true,
  })
 );
+app.use(express.json());
+app.use(cookieParser());
+
+// middleWare
+
+const logger = (req, res, next) => {
+ //  console.log('log info', req.method, req.url);
+ next();
+};
+
+const verifyToken = (req, res, next) => {
+ const token = req?.cookies?.token;
+ //  console.log('token in the middleware', token);
+ if (!token) {
+  return res.status(401).send({ message: 'unauthorized access' });
+ }
+ jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  if (err) {
+   return res.status(401).send({ message: 'unauthorized access' });
+  }
+  req.user = decoded;
+  next();
+ });
+};
 
 // mongoDB-start
 
@@ -53,12 +77,11 @@ app.post('/logout', async (req, res) => {
 const jobsCollection = client.db('jobsCollection').collection('jobs');
 const bidsCollection = client.db('bidsCollection').collection('bids');
 
-// job-post-api
+// job--api
 
 app.post('/jobs', async (req, res) => {
  try {
   const data = req.body;
-
   const result = await jobsCollection.insertOne(data);
   res.send(result);
  } catch (error) {
@@ -66,14 +89,15 @@ app.post('/jobs', async (req, res) => {
  }
 });
 
-// app.get('/jobs', async (req, res) => {
-//  const result = await jobsCollection.find().toArray();
-//  res.send(result);
-// });
+app.get('/jobs', async (req, res) => {
+ const result = await jobsCollection.find().toArray();
+ res.send(result);
+});
 
 app.get('/jobs/:id', async (req, res) => {
  try {
   const id = req.params.id;
+
   const query = { _id: new ObjectId(id) };
   const result = await jobsCollection.findOne(query);
   res.send(result);
@@ -81,8 +105,12 @@ app.get('/jobs/:id', async (req, res) => {
   console.log(err);
  }
 });
-app.get('/jobs', async (req, res) => {
+app.get('/jobs', logger, verifyToken, async (req, res) => {
  try {
+  console.log('token owner info', req.user);
+  if (req.user?.email !== req.query?.email) {
+   return res.status(403).send({ message: 'forbidden access' });
+  }
   let query = {};
   if (req.query?.email) {
    query = { email: req.query.email };
@@ -141,13 +169,18 @@ app.post('/bids', async (req, res) => {
  }
 });
 
-// app.get('/bids', async (req, res) => {
-//  const result = await bidsCollection.find().toArray();
-//  res.send(result);
-// });
-
 app.get('/bids', async (req, res) => {
+ const result = await bidsCollection.find().toArray();
+ res.send(result);
+});
+
+app.get('/bids', logger, verifyToken, async (req, res) => {
  try {
+  console.log('token owner info', req.user);
+
+  if (req.user?.email !== req.query?.email) {
+   return res.status(403).send({ message: 'forbidden access' });
+  }
   let query = {};
   if (req.query?.email) {
    query = { email: req.query.email };
