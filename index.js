@@ -79,6 +79,30 @@ app.delete('/jobs/:id', async (req, res) => {
  }
 });
 
+app.put('/jobs/:id', async (req, res) => {
+ try {
+  const id = req.params.id;
+  const UpdatedBody = req.body;
+  const query = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+  const updateDoc = {
+   $set: {
+    email: UpdatedBody.email,
+    job_title: UpdatedBody.job_title,
+    deadline: UpdatedBody.deadline,
+    description: UpdatedBody.description,
+    category: UpdatedBody.category,
+    min_price: UpdatedBody.min_price,
+    max_price: UpdatedBody.max_price,
+   },
+  };
+  const result = await jobsCollection.updateOne(query, updateDoc, options);
+  res.send(result);
+ } catch (err) {
+  console.log(err);
+ }
+});
+
 // bidding api
 
 app.post('/bids', async (req, res) => {
