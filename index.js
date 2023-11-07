@@ -2,12 +2,18 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
+var jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(cors());
+app.use(
+ cors({
+  origin: ['http://localhost:5173'],
+  credentials: true,
+ })
+);
 
 // mongoDB-start
 
@@ -20,6 +26,15 @@ const client = new MongoClient(uri, {
   strict: true,
   deprecationErrors: true,
  },
+});
+
+// jwt
+
+app.post('/jwt', async (req, res) => {
+ const user = req.body;
+ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+ res.send({ token });
 });
 
 // database collections
