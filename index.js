@@ -1,7 +1,7 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const cors = require('cors');
 require('dotenv').config();
+const cors = require('cors');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 
@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 
 app.use(
  cors({
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'https://assignment-11-client-e6450.web.app'],
   credentials: true,
  })
 );
@@ -20,7 +20,6 @@ app.use(cookieParser());
 // middleWare
 
 const logger = (req, res, next) => {
- //  console.log('log info', req.method, req.url);
  next();
 };
 
@@ -69,6 +68,7 @@ app.post('/jwt', async (req, res) => {
 
 app.post('/logout', async (req, res) => {
  const user = req.body;
+ console.log('logging out ', user);
  res.clearCookie('token', { maxAge: 0 }).send({ success: true });
 });
 
