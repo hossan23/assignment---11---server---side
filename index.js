@@ -108,22 +108,22 @@ app.get('/jobs/:id', async (req, res) => {
   console.log(err);
  }
 });
-app.get('/jobs', logger, verifyToken, async (req, res) => {
- try {
-  // console.log('token owner info', req.user);
-  if (req.user?.email !== req.query?.email) {
-   return res.status(403).send({ message: 'forbidden access' });
-  }
-  let query = {};
-  if (req.query?.email) {
-   query = { email: req.query.email };
-  }
-  const result = await jobsCollection.find(query).toArray();
-  res.send(result);
- } catch (err) {
-  console.log(err);
- }
-});
+// app.get('/jobs', logger, verifyToken, async (req, res) => {
+//  try {
+//   if (req.user?.email !== req.query?.email) {
+//    return res.status(403).send({ message: 'forbidden access' });
+//   }
+
+//   let query = {};
+//   if (req.query?.email) {
+//    query = { email: req.query.email };
+//   }
+//   const result = await jobsCollection.find(query).toArray();
+//   res.send(result);
+//  } catch (err) {
+//   console.log(err);
+//  }
+// });
 
 app.delete('/jobs/:id', async (req, res) => {
  try {
@@ -187,7 +187,7 @@ app.get('/bids', logger, verifyToken, async (req, res) => {
   if (req.user?.email !== req.query?.email && req.user?.email !== req.query?.buyerEmail) {
    return res.status(403).send({ message: 'forbidden access' });
   }
-  console.log(req.query);
+
   let query = {};
 
   if (req.query?.buyerEmail) {
@@ -198,7 +198,17 @@ app.get('/bids', logger, verifyToken, async (req, res) => {
    query.email = req.query.email;
   }
 
-  const result = await bidsCollection.find(query).toArray();
+  let sortCriteria = {};
+
+  if (req.query?.sortBy) {
+   if (req.query.sortBy === 'status') {
+    sortCriteria = { status: 1 };
+   } else {
+    sortCriteria = { [req.query.sortBy]: 1 };
+   }
+  }
+
+  const result = await bidsCollection.find(query).sort(sortCriteria).toArray();
   res.send(result);
  } catch (err) {
   console.log(err);
