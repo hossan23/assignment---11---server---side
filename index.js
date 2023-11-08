@@ -77,7 +77,7 @@ app.post('/logout', async (req, res) => {
 const jobsCollection = client.db('jobsCollection').collection('jobs');
 const bidsCollection = client.db('bidsCollection').collection('bids');
 
-// job--api
+// job------------api-----------
 
 app.post('/jobs', async (req, res) => {
  try {
@@ -90,14 +90,17 @@ app.post('/jobs', async (req, res) => {
 });
 
 app.get('/jobs', async (req, res) => {
- const result = await jobsCollection.find().toArray();
- res.send(result);
+ try {
+  const result = await jobsCollection.find().toArray();
+  res.send(result);
+ } catch (err) {
+  console.log(err.message);
+ }
 });
 
 app.get('/jobs/:id', async (req, res) => {
  try {
   const id = req.params.id;
-
   const query = { _id: new ObjectId(id) };
   const result = await jobsCollection.findOne(query);
   res.send(result);
@@ -107,7 +110,7 @@ app.get('/jobs/:id', async (req, res) => {
 });
 app.get('/jobs', logger, verifyToken, async (req, res) => {
  try {
-  console.log('token owner info', req.user);
+  // console.log('token owner info', req.user);
   if (req.user?.email !== req.query?.email) {
    return res.status(403).send({ message: 'forbidden access' });
   }
@@ -157,7 +160,7 @@ app.patch('/jobs/:id', async (req, res) => {
  }
 });
 
-// bidding api
+// bidding--------api----------------
 
 app.post('/bids', async (req, res) => {
  try {
@@ -169,22 +172,32 @@ app.post('/bids', async (req, res) => {
  }
 });
 
-app.get('/bids', async (req, res) => {
- const result = await bidsCollection.find().toArray();
- res.send(result);
-});
+// app.get('/bids', async (req, res) => {
+//  try {
+//   const result = await bidsCollection.find().toArray();
+
+//   res.send(result);
+//  } catch (err) {
+//   console.log(err.message);
+//  }
+// });
 
 app.get('/bids', logger, verifyToken, async (req, res) => {
  try {
-  console.log('token owner info', req.user);
-
-  if (req.user?.email !== req.query?.email) {
+  if (req.user?.email !== req.query?.email && req.user?.email !== req.query?.buyerEmail) {
    return res.status(403).send({ message: 'forbidden access' });
   }
+  console.log(req.query);
   let query = {};
-  if (req.query?.email) {
-   query = { email: req.query.email };
+
+  if (req.query?.buyerEmail) {
+   query.buyerEmail = req.query.buyerEmail;
   }
+
+  if (req.query?.email) {
+   query.email = req.query.email;
+  }
+
   const result = await bidsCollection.find(query).toArray();
   res.send(result);
  } catch (err) {
